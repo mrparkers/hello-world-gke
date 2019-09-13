@@ -11,4 +11,4 @@ tf-plan: tf-docker
 	docker run -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud gcloud-terraform terraform plan
 
 tf-apply: tf-docker
-	docker run -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud gcloud-terraform terraform apply
+	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud gcloud-terraform terraform apply
