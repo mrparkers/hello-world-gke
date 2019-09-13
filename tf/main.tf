@@ -7,6 +7,11 @@ data "google_billing_account" "default_billing_account" {
   open         = true
 }
 
-output "billing_account_id" {
-  value = data.google_billing_account.default_billing_account.id
+resource "google_project" "project" {
+  name       = var.gcloud_project_id
+  project_id = var.gcloud_project_id
+
+  auto_create_network = false // we will create our own network that is specifically designed for VPC-native clusters
+
+  billing_account = data.google_billing_account.default_billing_account.id
 }
