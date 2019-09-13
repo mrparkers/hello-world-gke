@@ -3,6 +3,8 @@ Hello world application deployed to Google Cloud Kubernetes Engine
 
 ## Prerequisites
 
+#### Google Cloud SDK
+
 This demo application will be deployed to Google Cloud Platform. As
 such, you will need a Google Cloud account in order to deploy this to
 your own project.
@@ -39,3 +41,11 @@ communicating to Google APIs:
 ```bash
 gcloud auth application-default login
 ```
+
+#### Docker
+
+The only other prerequisite required for this exercise is Docker. While
+this exercise takes advantage of several different tools to provision
+infrastructure, such as Terraform, Helm, and the Kubernetes CLI, each of
+these tools will be wrapped within a Docker image that can be built and
+used locally.
