@@ -39,7 +39,7 @@ resource "google_compute_subnetwork" "vpc_k8s" {
   name                     = "hello-world-gke-us-central1"
   description              = "Subnet for VPC Native GKE cluster"
   network                  = google_compute_network.vpc.id
-  region                   = "us-central1"
+  region                   = var.gcloud_region
   enable_flow_logs         = true
   private_ip_google_access = true
 
@@ -52,4 +52,35 @@ resource "google_compute_subnetwork" "vpc_k8s" {
     ip_cidr_range = "172.18.16.0/22"
     range_name    = "gke-services"
   }
+}
+
+// NAT
+
+// free trial accounts have a quota of one IP address per region. you can increase this to two if you want HA and are not on the free trial
+resource "google_compute_address" "nat_ip_address" {
+  project = google_project.project.id
+  region  = var.gcloud_region
+  name    = "nat-ip-address-1"
+}
+
+resource "google_compute_router" "nat_router" {
+  project = google_project.project.id
+  network = google_compute_network.vpc.self_link
+  name    = "nat-router"
+  region  = var.gcloud_region
+}
+
+resource "google_compute_router_nat" "nat_gateway" {
+  project = google_project.project.id
+  name    = "nat-gateway-us-central1"
+  router  = google_compute_router.nat_router.name
+  region  = var.gcloud_region
+
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+  min_ports_per_vm                   = 4096
+
+  nat_ip_allocate_option = "MANUAL_ONLY"
+  nat_ips                = [
+    google_compute_address.nat_ip_address.self_link
+  ]
 }
