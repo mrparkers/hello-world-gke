@@ -45,12 +45,12 @@ resource "google_compute_subnetwork" "vpc_k8s" {
 
   secondary_ip_range {
     ip_cidr_range = "172.18.0.0/20"
-    range_name    = "gke-pods"
+    range_name    = var.gke_pod_subnet_name
   }
 
   secondary_ip_range {
     ip_cidr_range = "172.18.16.0/22"
-    range_name    = "gke-services"
+    range_name    = var.gke_service_subnet_name
   }
 }
 
