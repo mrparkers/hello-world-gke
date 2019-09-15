@@ -52,11 +52,6 @@ resource "google_container_cluster" "gke_cluster" {
     network_policy_config {
       disabled = false
     }
-
-    istio_config {
-      disabled = false
-      auth     = "AUTH_MUTUAL_TLS"
-    }
   }
 
   pod_security_policy_config {
@@ -122,8 +117,8 @@ resource "google_container_node_pool" "standard_v4_us_central1" {
     machine_type    = "n1-standard-2"
     image_type      = "COS"
     // free accounts have a max of 100gb of ssd space per region, meaning three nodes can have 33gb each
-    disk_size_gb    = 33
-    disk_type       = "pd-ssd"
+    disk_size_gb = 33
+    disk_type    = "pd-ssd"
 
     tags = [
       "gke",
