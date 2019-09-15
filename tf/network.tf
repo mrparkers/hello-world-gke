@@ -54,6 +54,12 @@ resource "google_compute_subnetwork" "vpc_k8s" {
   }
 }
 
+resource "google_compute_address" "loadbalancer_ip" {
+  project = google_project.project.id
+  region  = var.gcloud_region
+  name    = "loadbalancer-ip"
+}
+
 // NAT
 
 // free trial accounts have a quota of one IP address per region, so we won't be creating this NAT.
