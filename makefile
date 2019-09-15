@@ -18,3 +18,11 @@ app-build:
 
 app-run: app-build
 	docker run -it --rm -p 5555:5555 hello-world-node-app:latest
+
+up: docker-build
+	docker run \
+		-v $$(pwd)/tf:/usr/src \
+		-v $$(pwd)/k8s:/usr/src/k8s \
+		-v $$(pwd)/scripts:/usr/src/scripts \
+		-v $$HOME/.config/gcloud:/root/.config/gcloud \
+		hello-world-gke ./scripts/up.sh
