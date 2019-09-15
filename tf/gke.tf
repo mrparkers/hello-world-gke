@@ -102,7 +102,7 @@ resource "google_project_iam_member" "gke_node_pool_svc_permissions" {
 }
 
 // node pool
-resource "google_container_node_pool" "standard_v4_us_central1" {
+resource "google_container_node_pool" "standard_node_pool_us_central1" {
   provider   = "google-beta.beta"
   project    = google_project.project.id
   name       = "gke-standard-node-pool"
