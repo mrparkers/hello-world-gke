@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "app.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ template "app.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "app.name" . }}
+      app.kubernetes.io/instance: {{ template "app.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/instance: {{ template "app.fullname" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_PORT
+              value: {{ .Values.port | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - "sleep 2"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 2
+          resources:
+                {{ toYaml .Values.resources | indent 12 }}
+            {{- with .Values.nodeSelector }}
+      nodeSelector:
+            {{ toYaml . | indent 8 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+      affinity:
+            {{ toYaml . | indent 8 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+      tolerations:
+            {{ toYaml . | indent 8 }}
+        {{- end }}

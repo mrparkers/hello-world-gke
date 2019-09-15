@@ -1,0 +1,16 @@
+replicaCount: 2
+
+image: mrparkers/hello-world-gke:latest
+
+port: 5555
+
+nameOverride: ""
+fullnameOverride: "hello-world-gke"
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

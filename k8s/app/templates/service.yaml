@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "app.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ template "app.fullname" . }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ template "app.fullname" . }}
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.port }}
+      name: http-{{ template "app.fullname" . }}
+      protocol: TCP
