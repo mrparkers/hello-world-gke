@@ -4,12 +4,18 @@ set -euo pipefail
 
 # Apply Terraform, provision project, network, and cluster
 
-terraform apply --auto-approve
+printf "\n\n----- Creating project, network, and cluster -----\n\n"
+
+echo "You will be prompted for a \`gcloud_project_id\` variable. This will uniquely identify your project in GCP."
+echo "You can create a \`terraform.tfvars\` file to avoid being prompted for this in the future."
+terraform apply
 
 clusterName=$(terraform output --json | jq -r '.gke_cluster_name.value')
 clusterProject=$(terraform output --json | jq -r '.gke_cluster_project.value')
 clusterRegion=$(terraform output --json | jq -r '.gke_cluster_region.value')
 loadbalancerIP=$(terraform output --json | jq -r '.gke_loadbalancer_ip.value')
+
+printf "\n\n----- Applying Kubernetes manifest files -----\n\n"
 
 # Fetch cluster credentials
 
@@ -24,18 +30,22 @@ kubectl rollout status deploy/kube-dns -n kube-system
 
 # Install cert-manager
 
-kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
-kubectl apply -f k8s/cert-manager/namespace.yml
-
 helm repo add jetstack https://charts.jetstack.io # cert-manager
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/ # nginx
 helm repo update
 
+printf "\n\n----- Installing cert-manager -----\n\n"
+
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
+kubectl apply -f k8s/cert-manager/namespace.yml
+
 if !(helm status cert-manager -n cert-manager &> /dev/null); then
-  helm install cert-manager jetstack/cert-manager \
+  while !(helm install cert-manager jetstack/cert-manager \
     --namespace cert-manager \
     --version 0.10.0 \
-    --wait
+    --wait); do
+    sleep 5;
+  done;
 fi
 
 # Create CA and Certificate for SSL
@@ -45,6 +55,7 @@ kubectl apply -f k8s/cert-manager/ca-certificate.yml
 kubectl apply -f k8s/cert-manager/ca-issuer.yml
 kubectl apply -f k8s/cert-manager/app-certificate.yml
 
+printf "\n\n----- Installing nginx-ingress-controller -----\n\n"
 
 # NGINX Ingress Controller
 
@@ -58,6 +69,8 @@ if !(helm status nginx -n nginx &> /dev/null); then
     --wait
 fi
 
+printf "\n\n----- Deploying App -----\n\n"
+
 # Deploy app
 
 if !(helm status app &> /dev/null); then
@@ -66,16 +79,27 @@ else
   helm upgrade app k8s/app/
 fi
 
+kubectl rollout status deploy/hello-world-gke
+
 # Test!
+
+printf "\n\n----- Testing App -----\n\n"
 
 kubectl get secret ca-certificate -o "jsonpath={.data['tls\.crt']}" | base64 -d > /usr/share/ca.crt
 
-echo "${loadbalancerIP} hello-world-gke.app" >> /etc/hosts
+hostRecord="${loadbalancerIP} hello-world-gke.app"
+echo ${hostRecord} >> /etc/hosts
 
 curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ | jq '.'
 
-## test rolling deployment
+printf "\n\n----- Testing App Rolling Deployment (none of these requests should fail) -----\n\n"
+
 kubectl patch deploy hello-world-gke -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"timestamp\": \"$(date +%s)\"}}}}}"
 for i in $(seq 1 120); do
   curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ | jq -rc '.'
 done
+
+printf "\n\nFinished!  The following host record can be added to test this yourself:\n"
+echo ${hostRecord}
+
+echo "Once this is added, you can hit https://hello-world-gke.app in your browser."
