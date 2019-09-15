@@ -4,7 +4,6 @@
 
 resource "google_project_service" "services" {
   for_each = toset([
-    "compute.googleapis.com",
     "container.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
