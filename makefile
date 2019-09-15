@@ -1,17 +1,17 @@
 MAKEFLAGS += --silent
-.PHONY: tf-docker tf-init tf-plan tf-apply app-build app-run
+.PHONY: docker-build tf-init tf-plan tf-apply app-build app-run
 
-tf-docker:
-	docker build images/gcloud-terraform -t gcloud-terraform:latest
+docker-build:
+	docker build . -t hello-world-gke:latest
 
-tf-init: tf-docker
-	docker run -v $$(pwd)/tf:/usr/src gcloud-terraform terraform init
+tf-init: docker-build
+	docker run -v $$(pwd)/tf:/usr/src hello-world-gke terraform init
 
-tf-plan: tf-docker
-	docker run -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud gcloud-terraform terraform plan
+tf-plan: docker-build
+	docker run -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform plan
 
-tf-apply: tf-docker
-	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud gcloud-terraform terraform apply
+tf-apply: docker-build
+	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform apply
 
 app-build:
 	docker build app -t hello-world-app:latest
