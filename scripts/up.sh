@@ -67,8 +67,8 @@ echo "${loadbalancerIP} hello-world-gke.app" >> /etc/hosts
 
 curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ | jq '.'
 
+## test rolling deployment
 kubectl patch deploy hello-world-gke -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"timestamp\": \"$(date +%s)\"}}}}}"
-
 for i in $(seq 1 120); do
   curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ | jq -rc '.'
 done
