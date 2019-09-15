@@ -15,6 +15,13 @@ loadbalancerIP=$(terraform output --json | jq -r '.gke_loadbalancer_ip.value')
 
 gcloud container clusters get-credentials --project ${clusterProject} --region ${clusterRegion} ${clusterName}
 
+# Verify cluster can receive API requests
+
+kubectl rollout status deploy/calico-node-vertical-autoscaler -n kube-system
+kubectl rollout status deploy/calico-typha-horizontal-autoscaler -n kube-system
+kubectl rollout status deploy/calico-typha-vertical-autoscaler -n kube-system
+kubectl rollout status deploy/kube-dns -n kube-system
+
 # Install cert-manager
 
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
