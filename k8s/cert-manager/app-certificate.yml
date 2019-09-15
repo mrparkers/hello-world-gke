@@ -6,8 +6,8 @@ metadata:
 spec:
   secretName: app-certificate
   issuerRef:
-    name: ca-clusterissuer
-    kind: ClusterIssuer
+    name: ca-issuer
+    kind: Issuer
   commonName: hello-world-gke.app
   organization:
     - Hello World GKE CA
