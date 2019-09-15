@@ -7,6 +7,9 @@ docker-build:
 tf-init: docker-build
 	docker run -v $$(pwd)/tf:/usr/src hello-world-gke terraform init
 
+tf-fmt: docker-build
+	docker run -v $$(pwd)/tf:/usr/src hello-world-gke terraform fmt
+
 tf-plan: docker-build
 	docker run -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform plan
 
