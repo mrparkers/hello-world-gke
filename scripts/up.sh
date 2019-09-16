@@ -39,6 +39,7 @@ printf "\n\n----- Installing cert-manager -----\n\n"
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
 kubectl apply -f k8s/cert-manager/namespace.yml
 
+echo "This next step may appear to throw an error. This is okay, the script will handle it."
 if !(helm status cert-manager -n cert-manager &> /dev/null); then
   while !(helm install cert-manager jetstack/cert-manager \
     --namespace cert-manager \
