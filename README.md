@@ -49,3 +49,69 @@ this exercise takes advantage of several different tools to provision
 infrastructure, such as Terraform, Helm, and the Kubernetes CLI, each of
 these tools will be wrapped within a Docker image that can be built and
 used locally.
+
+## Deploying the exercise
+
+The following command can be used to deploy this exercise:
+
+```
+$ make up
+```
+
+This command will build the image used for this exercise, and use it to
+run `terraform`, `helm`, and `kubectl` to provision the environment for
+you.
+
+When you run this, you will be prompted to enter a value for your Google
+Cloud Project ID. This is a string value that must be unique across all
+of Google Cloud.
+
+You will also be prompted to type the string `yes` during the `terraform
+apply` step.
+
+## Cleaning up
+
+The following command can be used to clean up all resources deployed
+within this exercise:
+
+```
+$ make down
+```
+
+You will be prompted to enter the string `yes` to confirm that you want
+to destroy the resources provisioned during this exercise.
+
+## Tools used
+
+- [Terraform](https://www.terraform.io/) - used to provision and
+  configure all of the Google Cloud infrastructure. The code for this
+  can be found in the `tf` folder.
+- [Helm](https://helm.sh/) - used to deploy the demo application and the
+  [cert-manager](https://github.com/jetstack/cert-manager) and
+  [nginx-ingress](https://github.com/helm/charts/tree/master/stable/nginx-ingress)
+  charts.
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) -
+  used to interact with the provisioned Kubernetes cluster
+- [jq](https://stedolan.github.io/jq/) - used to parse JSON output from
+  various commands
+  
+## Helm charts used
+
+- [cert-manager](https://github.com/jetstack/cert-manager) - used to
+  create a CA and SSL certificate to enable HTTPS communication with our
+  app.
+- [nginx-ingress](https://github.com/helm/charts/tree/master/stable/nginx-ingress)
+  \- used to enable ingress into our cluster using the `Ingress` API.
+  This ingress controller consumes the certificate created by
+  cert-manager and handles SSL termination for our application.
+
+## Demo application
+
+The application that will be deployed to your Kubernetes cluster during
+this exercise is a Node.js based app that returns a JSON payload at `/`.
+The source code can be found within the `app` folder. This code has
+already been packaged into a Docker container that can be found at
+[`mrparkers/hello-world-gke`](https://hub.docker.com/r/mrparkers/hello-world-gke).
+
+The helm chart used for this application can be found within the
+`k8s/app` folder.
