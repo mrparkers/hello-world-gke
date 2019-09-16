@@ -10,13 +10,13 @@ tf-init: docker-build
 tf-fmt: docker-build
 	docker run -v $$(pwd)/tf:/usr/src hello-world-gke terraform fmt
 
-tf-plan: docker-build
+tf-plan: tf-init
 	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform plan
 
-tf-apply: docker-build
+tf-apply: tf-init
 	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform apply
 
-tf-destroy: docker-build
+tf-destroy: tf-init
 	docker run -it -v $$(pwd)/tf:/usr/src -v $$HOME/.config/gcloud:/root/.config/gcloud hello-world-gke terraform destroy
 
 app-build:
@@ -25,7 +25,7 @@ app-build:
 app-run: app-build
 	docker run -it --rm -p 5555:5555 hello-world-node-app:latest
 
-up: docker-build
+up: tf-init
 	docker run -it \
 		-v $$(pwd)/tf:/usr/src \
 		-v $$(pwd)/k8s:/usr/src/k8s \
@@ -33,7 +33,7 @@ up: docker-build
 		-v $$HOME/.config/gcloud:/root/.config/gcloud \
 		hello-world-gke ./scripts/up.sh
 
-down: docker-build
+down: tf-init
 	docker run -it \
 		-v $$(pwd)/tf:/usr/src \
 		-v $$(pwd)/k8s:/usr/src/k8s \
