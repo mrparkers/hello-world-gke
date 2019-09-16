@@ -8,6 +8,8 @@ resource "google_compute_network" "vpc" {
 
 /*
 
+  The subnet below will be consumed by our VPC-native cluster (https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips)
+
   Subnet CIDR math:
 
   -- GKE Master Nodes (172.18.20.0/28) --
@@ -59,36 +61,3 @@ resource "google_compute_address" "loadbalancer_ip" {
   region  = var.gcloud_region
   name    = "loadbalancer-ip"
 }
-
-// NAT
-
-// free trial accounts have a quota of one IP address per region, so we won't be creating this NAT.
-// leaving the code here for anyone who is interested
-
-//resource "google_compute_address" "nat_ip_address" {
-//  project = google_project.project.id
-//  region  = var.gcloud_region
-//  name    = "nat-ip-address-1"
-//}
-//
-//resource "google_compute_router" "nat_router" {
-//  project = google_project.project.id
-//  network = google_compute_network.vpc.self_link
-//  name    = "nat-router"
-//  region  = var.gcloud_region
-//}
-//
-//resource "google_compute_router_nat" "nat_gateway" {
-//  project = google_project.project.id
-//  name    = "nat-gateway-us-central1"
-//  router  = google_compute_router.nat_router.name
-//  region  = var.gcloud_region
-//
-//  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-//  min_ports_per_vm                   = 4096
-//
-//  nat_ip_allocate_option = "MANUAL_ONLY"
-//  nat_ips                = [
-//    google_compute_address.nat_ip_address.self_link
-//  ]
-//}
