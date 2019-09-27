@@ -1,3 +1,23 @@
+// node pool service account
+
+resource "google_service_account" "gke_node_pool_svc" {
+  project    = google_project.project.id
+  account_id = "gke-node-pool"
+}
+
+// the following permissions are needed so the cluster's logs and events can be exported to StackDriver
+resource "google_project_iam_member" "gke_node_pool_svc_permissions" {
+  for_each = toset([
+    "roles/logging.logWriter",
+    "roles/monitoring.viewer",
+    "roles/monitoring.metricWriter",
+  ])
+
+  project = google_project.project.id
+  member  = "serviceAccount:${google_service_account.gke_node_pool_svc.email}"
+  role    = each.value
+}
+
 // cluster
 
 resource "google_container_cluster" "gke_cluster" {
@@ -74,42 +94,6 @@ resource "google_container_cluster" "gke_cluster" {
   }
 
   initial_node_count       = 1
-  remove_default_node_pool = true
-
-  depends_on = [
-    google_project_service.services
-  ]
-}
-
-// node pool service account
-
-resource "google_service_account" "gke_node_pool_svc" {
-  project    = google_project.project.id
-  account_id = "gke-node-pool"
-}
-
-// the following permissions are needed so the cluster's logs and events can be exported to StackDriver
-resource "google_project_iam_member" "gke_node_pool_svc_permissions" {
-  for_each = toset([
-    "roles/logging.logWriter",
-    "roles/monitoring.viewer",
-    "roles/monitoring.metricWriter",
-  ])
-
-  project = google_project.project.id
-  member  = "serviceAccount:${google_service_account.gke_node_pool_svc.email}"
-  role    = each.value
-}
-
-// node pool
-resource "google_container_node_pool" "standard_node_pool_us_central1" {
-  provider   = "google-beta.beta"
-  project    = google_project.project.id
-  name       = "gke-standard-node-pool"
-  cluster    = google_container_cluster.gke_cluster.id
-  node_count = 1
-  location   = var.gcloud_region
-  version    = "1.14.3-gke.11"
 
   node_config {
     service_account = google_service_account.gke_node_pool_svc.email
@@ -123,6 +107,15 @@ resource "google_container_node_pool" "standard_node_pool_us_central1" {
     tags = [
       "gke",
     ]
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
   }
+
+  depends_on = [
+    google_project_service.services
+  ]
 }
 
