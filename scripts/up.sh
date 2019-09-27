@@ -95,6 +95,10 @@ kubectl get secret ca-certificate -o "jsonpath={.data['tls\.crt']}" | base64 -d 
 hostRecord="${loadbalancerIP} hello-world-gke.app"
 echo ${hostRecord} >> /etc/hosts
 
+until curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ --max-time 3 | jq '.' &> /dev/null; do
+  echo "Waiting for load balancer..."
+done
+
 curl --cacert /usr/share/ca.crt --silent https://hello-world-gke.app/ | jq '.'
 
 printf "\n\n----- Testing App Rolling Deployment (none of these requests should fail) -----\n\n"
