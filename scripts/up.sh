@@ -49,6 +49,10 @@ if !(helm status cert-manager -n cert-manager &> /dev/null); then
   done;
 fi
 
+kubectl rollout status deploy/cert-manager -n cert-manager
+kubectl rollout status deploy/cert-manager-webhook -n cert-manager
+kubectl rollout status deploy/cert-manager-cainjector -n cert-manager
+
 # Create CA and Certificate for SSL
 
 kubectl apply -f k8s/cert-manager/self-signed-clusterissuer.yml
